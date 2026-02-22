@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.0
+    image: traefik:v2.11
     container_name: hostura-traefik
     restart: unless-stopped
     command:
@@ -9,9 +9,8 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=hostura"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.email=${HOSTURA_ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.email=${HOSTURA_ACME_EMAIL:-admin@localhost}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
       - "--log.level=INFO"
@@ -28,8 +27,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`traefik.${HOSTURA_DOMAIN}`)"
       - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.dashboard.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
 
 volumes:
   hostura_traefik_certs:

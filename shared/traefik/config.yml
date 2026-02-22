@@ -1,6 +1,6 @@
 name: "Traefik"
 description: "Cloud-native reverse proxy and load balancer with automatic HTTPS"
-version: "3.0"
+version: "2.11"
 maintainer: "hostura"
 categories:
   - networking

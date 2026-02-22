@@ -23,8 +23,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.authentik.rule=Host(`auth.${HOSTURA_DOMAIN}`)"
-      - "traefik.http.routers.authentik.entrypoints=websecure"
-      - "traefik.http.routers.authentik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.authentik.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.authentik.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
       - "traefik.http.services.authentik.loadbalancer.server.port=9000"
 
   authentik-worker:

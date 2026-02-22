@@ -1,5 +1,3 @@
-version: "3.8"
-
 # ============================================
 # WORDPRESS
 # ============================================
@@ -36,9 +34,9 @@ services:
         required: false  # Optional if shared mode
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wordpress.rule=Host(`www.${DOMAIN}`)"
-      - "traefik.http.routers.wordpress.entrypoints=websecure"
-      - "traefik.http.routers.wordpress.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.wordpress.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.wordpress.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.wordpress.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/wp-admin/install.php"]

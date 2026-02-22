@@ -1,12 +1,10 @@
-version: "3.8"
-
 services:
   jellyfin:
     image: jellyfin/jellyfin:10.8.13
     container_name: jellyfin
     restart: unless-stopped
     environment:
-      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PublishedServerUrl:-https://media.${DOMAIN}}
+      - JELLYFIN_PublishedServerUrl=${APP_URL}
     volumes:
       - jellyfin_config:/config
       - jellyfin_cache:/cache
@@ -18,9 +16,9 @@ services:
     #   - /dev/dri:/dev/dri
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.jellyfin.rule=Host(`media.${DOMAIN}`)"
-      - "traefik.http.routers.jellyfin.entrypoints=websecure"
-      - "traefik.http.routers.jellyfin.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.jellyfin.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.jellyfin.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.jellyfin.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
       - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
       # Headers for clients
       - "traefik.http.middlewares.jellyfin-headers.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow"

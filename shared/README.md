@@ -22,7 +22,7 @@ When a catalog application requires a database, the administrator can choose:
 
 | Service | Ports | Network | Description |
 |---------|-------|---------|-------------|
-| Traefik 3.0 | 80, 443, 8080 | hostura | Reverse proxy with automatic HTTPS |
+| Traefik 2.11 | 80, 443, 8080 | hostura | Reverse proxy with automatic HTTPS |
 | Authentik | 9000 | hostura | Identity provider (SSO, MFA) |
 
 ### Database Services
