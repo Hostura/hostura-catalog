@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hostura-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=hostura
+      - POSTGRES_PASSWORD=${HOSTURA_POSTGRES_PASSWORD:?Password required}
+      - POSTGRES_DB=hostura
+    volumes:
+      - hostura_postgres_data:/var/lib/postgresql/data
+      - ./init.d:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hostura-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hostura"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # No exposed ports - access only via internal network
+
+volumes:
+  hostura_postgres_data:
+    name: hostura_postgres_data
+
+networks:
+  hostura-internal:
+    name: hostura-internal

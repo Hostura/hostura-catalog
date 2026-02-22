@@ -1,0 +1,42 @@
+name: Jellyfin
+description: "Free software media server for streaming movies, series, music and photos"
+version: "10.8.13"
+logo: logo.svg
+website: https://jellyfin.org
+documentation: https://jellyfin.org/docs/
+maintainer: "hostura-community"
+categories:
+  - media
+  - streaming
+
+variables:
+  - name: JELLYFIN_MEDIA_PATH
+    label: "Media path"
+    description: "Absolute path to your media library on the host"
+    required: true
+    default: "/srv/media"
+
+  - name: JELLYFIN_PublishedServerUrl
+    label: "Public URL"
+    description: "Public server URL (for clients)"
+    required: false
+
+traefik:
+  subdomain: media
+  port: 8096
+  auth: false  # Jellyfin handles its own auth
+
+backup:
+  volumes:
+    - jellyfin_config
+  pre_backup: |
+    # Optional: stop transcodings before backup
+    docker exec jellyfin pkill -f ffmpeg || true
+
+resources:
+  memory: "1G"
+  cpu: 2
+
+notes: |
+  For hardware transcoding (GPU), additional configuration is required.
+  See documentation for Intel QSV, NVIDIA NVENC or AMD AMF.

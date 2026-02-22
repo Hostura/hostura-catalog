@@ -1,0 +1,40 @@
+name: MySQL (Shared)
+description: "Shared MySQL instance for Hostura applications"
+version: "8.0"
+logo: logo.svg
+website: https://www.mysql.com
+maintainer: "hostura"
+type: shared-service
+categories:
+  - storage
+
+variables:
+  - name: HOSTURA_MYSQL_ROOT_PASSWORD
+    label: "Root password"
+    description: "MySQL administrator password (auto-generated if empty)"
+    required: true
+    secret: true
+
+# No Traefik config - internal service only
+traefik:
+  enabled: false
+
+backup:
+  volumes:
+    - hostura_mysql_data
+  pre_backup: |
+    # Dump all databases before backup
+    docker exec hostura-mysql mysqldump -u root -p${HOSTURA_MYSQL_ROOT_PASSWORD} --all-databases > /backup/mysql-dump.sql
+
+resources:
+  memory: "512M"
+  cpu: 1
+
+internal:
+  network: hostura-internal
+  hostname: hostura-mysql
+  port: 3306
+
+notes: |
+  Shared service automatically managed by Hostura.
+  Each application creates its own database and user.

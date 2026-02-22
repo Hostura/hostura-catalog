@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hostura-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${HOSTURA_MYSQL_ROOT_PASSWORD:?Root password required}
+    volumes:
+      - hostura_mysql_data:/var/lib/mysql
+      - ./init.d:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hostura-internal
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${HOSTURA_MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # No exposed ports - access only via internal network
+
+volumes:
+  hostura_mysql_data:
+    name: hostura_mysql_data
+
+networks:
+  hostura-internal:
+    name: hostura-internal

@@ -1,0 +1,33 @@
+name: Uptime Kuma
+description: "Self-hosted uptime monitoring tool with modern interface"
+version: "1.23.11"
+logo: logo.svg
+website: https://uptime.kuma.pet
+documentation: https://github.com/louislam/uptime-kuma/wiki
+maintainer: "hostura-community"
+categories:
+  - monitoring
+
+variables:
+  - name: UPTIME_KUMA_DISABLE_FRAME_SAMEORIGIN
+    label: "Allow iframe"
+    description: "Allow embedding in an iframe"
+    required: false
+    default: "false"
+
+traefik:
+  subdomain: status
+  port: 3001
+  auth: false  # Uptime Kuma handles its own auth
+
+backup:
+  volumes:
+    - uptime_kuma_data
+
+resources:
+  memory: "256M"
+  cpu: 0.5
+
+notes: |
+  On first launch, you will need to create an administrator account.
+  Supports notifications via Discord, Telegram, Slack, Email, and many more.

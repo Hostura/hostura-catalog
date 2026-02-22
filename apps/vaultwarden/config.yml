@@ -1,0 +1,50 @@
+name: Vaultwarden
+description: "Lightweight self-hosted Bitwarden-compatible server for managing your passwords"
+version: "1.30.5"
+logo: logo.svg
+website: https://github.com/dani-garcia/vaultwarden
+documentation: https://github.com/dani-garcia/vaultwarden/wiki
+maintainer: "hostura-community"
+categories:
+  - security
+
+variables:
+  - name: VAULTWARDEN_ADMIN_TOKEN
+    label: "Admin token"
+    description: "Token to access the admin panel (/admin). Leave empty to disable."
+    required: false
+    secret: true
+
+  - name: VAULTWARDEN_SIGNUPS_ALLOWED
+    label: "Open signups"
+    description: "Allow new signups"
+    required: false
+    default: "false"
+
+  - name: VAULTWARDEN_INVITATIONS_ALLOWED
+    label: "Invitations allowed"
+    description: "Allow email invitations"
+    required: false
+    default: "true"
+
+  - name: VAULTWARDEN_SHOW_PASSWORD_HINT
+    label: "Show password hints"
+    required: false
+    default: "false"
+
+traefik:
+  subdomain: vault
+  port: 80
+  auth: false  # Vaultwarden handles its own auth
+
+backup:
+  volumes:
+    - vaultwarden_data
+
+resources:
+  memory: "128M"
+  cpu: 0.5
+
+notes: |
+  After installation, create your user account then disable signups.
+  Browser extension and Bitwarden mobile apps are compatible.

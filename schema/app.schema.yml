@@ -1,0 +1,287 @@
+# Validation schema for config.yml
+# Compatible with JSON Schema (via YAML conversion)
+
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "Hostura App Configuration"
+description: "Validation schema for config.yml files in the Hostura catalog"
+type: object
+
+required:
+  - name
+  - description
+  - version
+  - maintainer
+  - categories
+  - traefik
+
+properties:
+  # ============================================
+  # METADATA
+  # ============================================
+  name:
+    type: string
+    description: "Application name"
+    minLength: 1
+    maxLength: 50
+    examples:
+      - "Nextcloud"
+      - "Vaultwarden"
+
+  description:
+    type: string
+    description: "Short application description"
+    minLength: 10
+    maxLength: 200
+
+  version:
+    type: string
+    description: "Application version"
+    pattern: "^[0-9]+\\.[0-9]+(\\.[0-9]+)?(-[a-zA-Z0-9]+)?$"
+    examples:
+      - "1.0.0"
+      - "2.1.0-beta"
+
+  logo:
+    type: string
+    description: "Logo filename (in the same folder)"
+    pattern: "\\.(svg|png|jpg)$"
+    examples:
+      - "logo.svg"
+
+  website:
+    type: string
+    format: uri
+    description: "Application official website"
+
+  documentation:
+    type: string
+    format: uri
+    description: "Link to documentation"
+
+  maintainer:
+    type: string
+    description: "GitHub username of the maintainer"
+
+  categories:
+    type: array
+    description: "Application categories"
+    minItems: 1
+    maxItems: 5
+    items:
+      type: string
+      enum:
+        - cloud
+        - communication
+        - development
+        - media
+        - monitoring
+        - productivity
+        - security
+        - storage
+        - streaming
+        - other
+
+  # ============================================
+  # VARIABLES
+  # ============================================
+  variables:
+    type: array
+    description: "Configurable environment variables"
+    items:
+      type: object
+      required:
+        - name
+        - label
+      properties:
+        name:
+          type: string
+          description: "Variable name (UPPER_SNAKE_CASE)"
+          pattern: "^[A-Z][A-Z0-9_]*$"
+        label:
+          type: string
+          description: "Label displayed in the UI"
+        description:
+          type: string
+          description: "Detailed description"
+        required:
+          type: boolean
+          default: false
+          description: "Required variable"
+        default:
+          type: string
+          description: "Default value"
+        secret:
+          type: boolean
+          default: false
+          description: "Hide value (password, token)"
+        validation:
+          type: object
+          description: "Validation rules"
+          properties:
+            pattern:
+              type: string
+              description: "Validation regex"
+            min_length:
+              type: integer
+            max_length:
+              type: integer
+
+  # ============================================
+  # DEPENDENCIES
+  # ============================================
+  depends_on:
+    type: array
+    description: "Dependencies on other apps or services (excluding databases)"
+    items:
+      type: string
+    examples:
+      - ["redis"]
+      - ["redis", "elasticsearch"]
+
+  # ============================================
+  # DATABASE
+  # ============================================
+  database:
+    type: object
+    description: "Required database configuration"
+    properties:
+      type:
+        type: string
+        description: "Database type"
+        enum:
+          - mysql
+          - mariadb
+          - postgres
+          - mongodb
+          - none
+      version:
+        type: string
+        description: "Minimum required version (e.g., >=8.0)"
+        examples:
+          - ">=8.0"
+          - ">=15"
+      default_mode:
+        type: string
+        description: "Default mode suggested at installation"
+        enum:
+          - shared       # Use shared Hostura DB (recommended)
+          - dedicated    # Install a dedicated DB for this app
+        default: shared
+      allow_dedicated:
+        type: boolean
+        description: "Allow user to choose a dedicated DB"
+        default: true
+      allow_shared:
+        type: boolean
+        description: "Allow use of shared DB"
+        default: true
+      name:
+        type: string
+        description: "Database name to create"
+      user:
+        type: string
+        description: "Dedicated username for this app"
+      env_mapping:
+        type: object
+        description: "Mapping of injected environment variables"
+        properties:
+          host:
+            type: string
+            description: "Variable for DB host"
+          port:
+            type: string
+            description: "Variable for DB port"
+          name:
+            type: string
+            description: "Variable for DB name"
+          user:
+            type: string
+            description: "Variable for DB user"
+          password:
+            type: string
+            description: "Variable for DB password"
+
+  # ============================================
+  # TRAEFIK
+  # ============================================
+  traefik:
+    type: object
+    description: "Auto-generated Traefik configuration"
+    required:
+      - subdomain
+      - port
+    properties:
+      subdomain:
+        type: string
+        description: "Subdomain (e.g., 'app' → app.domain.tld)"
+        pattern: "^[a-z][a-z0-9-]*$"
+      port:
+        type: integer
+        description: "Container internal port"
+        minimum: 1
+        maximum: 65535
+      auth:
+        type: boolean
+        default: false
+        description: "Protect with Authentik"
+      middlewares:
+        type: array
+        description: "Additional Traefik middlewares"
+        items:
+          type: string
+
+  # ============================================
+  # BACKUP
+  # ============================================
+  backup:
+    type: object
+    description: "Backup configuration"
+    properties:
+      volumes:
+        type: array
+        description: "Docker volumes to backup"
+        items:
+          type: string
+      pre_backup:
+        type: string
+        description: "Command to run before backup (e.g., DB dump)"
+      post_backup:
+        type: string
+        description: "Command to run after backup"
+
+  # ============================================
+  # RESOURCES
+  # ============================================
+  resources:
+    type: object
+    description: "Recommended resource limits"
+    properties:
+      memory:
+        type: string
+        description: "Recommended minimum memory"
+        examples:
+          - "256M"
+          - "1G"
+      cpu:
+        type: number
+        description: "Recommended CPU cores"
+        examples:
+          - 0.5
+          - 2
+
+  # ============================================
+  # ADVANCED
+  # ============================================
+  privileged:
+    type: boolean
+    default: false
+    description: "Requires elevated privileges"
+
+  host_network:
+    type: boolean
+    default: false
+    description: "Requires host network"
+
+  notes:
+    type: string
+    description: "Additional installation notes"

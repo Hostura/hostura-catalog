@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.8.13
+    container_name: jellyfin
+    restart: unless-stopped
+    environment:
+      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PublishedServerUrl:-https://media.${DOMAIN}}
+    volumes:
+      - jellyfin_config:/config
+      - jellyfin_cache:/cache
+      - ${JELLYFIN_MEDIA_PATH:-/srv/media}:/media:ro
+    networks:
+      - traefik
+    # Uncomment for Intel QSV GPU transcoding
+    # devices:
+    #   - /dev/dri:/dev/dri
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`media.${DOMAIN}`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      # Headers for clients
+      - "traefik.http.middlewares.jellyfin-headers.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow"
+      - "traefik.http.routers.jellyfin.middlewares=jellyfin-headers"
+
+volumes:
+  jellyfin_config:
+  jellyfin_cache:
+
+networks:
+  traefik:
+    external: true

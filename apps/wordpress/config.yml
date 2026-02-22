@@ -1,0 +1,73 @@
+name: WordPress
+description: "The world's most popular CMS for building websites and blogs"
+version: "6.4"
+logo: logo.png
+website: https://wordpress.org
+documentation: https://developer.wordpress.org/
+maintainer: "hostura-community"
+categories:
+  - productivity
+  - cloud
+
+# ============================================
+# DATABASE
+# ============================================
+database:
+  type: mysql
+  version: ">=8.0"
+  default_mode: shared          # Recommend shared DB
+  allow_dedicated: true         # But allow dedicated choice
+  allow_shared: true
+  name: wordpress               # DB name to create
+  user: wordpress               # Dedicated user
+  env_mapping:
+    host: WORDPRESS_DB_HOST
+    name: WORDPRESS_DB_NAME
+    user: WORDPRESS_DB_USER
+    password: WORDPRESS_DB_PASSWORD
+
+# ============================================
+# VARIABLES
+# ============================================
+variables:
+  - name: WORDPRESS_TABLE_PREFIX
+    label: "Table prefix"
+    description: "WordPress table prefix (useful for multi-sites)"
+    required: false
+    default: "wp_"
+
+  - name: WORDPRESS_DEBUG
+    label: "Debug mode"
+    description: "Enable WordPress debug mode"
+    required: false
+    default: "false"
+
+# ============================================
+# TRAEFIK
+# ============================================
+traefik:
+  subdomain: www
+  port: 80
+  auth: false                   # WordPress handles its own auth
+
+# ============================================
+# BACKUP
+# ============================================
+backup:
+  volumes:
+    - wordpress_data
+  pre_backup: |
+    # Export the database
+    docker exec wordpress wp db export /var/www/html/wp-content/backup.sql --allow-root || true
+
+# ============================================
+# RESOURCES
+# ============================================
+resources:
+  memory: "256M"
+  cpu: 0.5
+
+notes: |
+  WordPress will connect to the database based on your choice:
+  - Shared mode: uses the Hostura MySQL instance (recommended)
+  - Dedicated mode: installs a MySQL container dedicated to WordPress

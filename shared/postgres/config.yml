@@ -1,0 +1,40 @@
+name: PostgreSQL (Shared)
+description: "Shared PostgreSQL instance for Hostura applications"
+version: "16"
+logo: logo.svg
+website: https://www.postgresql.org
+maintainer: "hostura"
+type: shared-service
+categories:
+  - storage
+
+variables:
+  - name: HOSTURA_POSTGRES_PASSWORD
+    label: "Admin password"
+    description: "Password for hostura user (auto-generated if empty)"
+    required: true
+    secret: true
+
+# No Traefik config - internal service only
+traefik:
+  enabled: false
+
+backup:
+  volumes:
+    - hostura_postgres_data
+  pre_backup: |
+    # Dump all databases before backup
+    docker exec hostura-postgres pg_dumpall -U hostura > /backup/postgres-dump.sql
+
+resources:
+  memory: "256M"
+  cpu: 0.5
+
+internal:
+  network: hostura-internal
+  hostname: hostura-postgres
+  port: 5432
+
+notes: |
+  Shared service automatically managed by Hostura.
+  Each application creates its own database and user.

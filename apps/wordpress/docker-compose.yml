@@ -1,0 +1,84 @@
+version: "3.8"
+
+# ============================================
+# WORDPRESS
+# ============================================
+# This compose supports two modes via profiles:
+# - Default (no profile): uses shared Hostura DB
+# - Profile "dedicated-db": installs dedicated MySQL
+#
+# Usage:
+#   Shared mode   : docker compose up -d
+#   Dedicated mode: docker compose --profile dedicated-db up -d
+# ============================================
+
+services:
+  wordpress:
+    image: wordpress:6.4-apache
+    container_name: wordpress
+    restart: unless-stopped
+    environment:
+      # Variables injected by Hostura based on chosen mode
+      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST:-hostura-mysql}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME:-wordpress}
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER:-wordpress}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD:?DB password required}
+      - WORDPRESS_TABLE_PREFIX=${WORDPRESS_TABLE_PREFIX:-wp_}
+      - WORDPRESS_DEBUG=${WORDPRESS_DEBUG:-false}
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - traefik
+      - hostura-internal
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: false  # Optional if shared mode
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=Host(`www.${DOMAIN}`)"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+      - "traefik.http.routers.wordpress.tls.certresolver=letsencrypt"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/wp-admin/install.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ============================================
+  # DEDICATED MYSQL (optional)
+  # ============================================
+  # Only enabled with --profile dedicated-db
+  mysql:
+    image: mysql:8.0
+    container_name: wordpress-mysql
+    profiles:
+      - dedicated-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${WORDPRESS_MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${WORDPRESS_DB_NAME:-wordpress}
+      - MYSQL_USER=${WORDPRESS_DB_USER:-wordpress}
+      - MYSQL_PASSWORD=${WORDPRESS_DB_PASSWORD:?DB password required}
+    volumes:
+      - wordpress_mysql_data:/var/lib/mysql
+    networks:
+      - hostura-internal
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  wordpress_data:
+  wordpress_mysql_data:  # Only used in dedicated mode
+
+networks:
+  traefik:
+    external: true
+  hostura-internal:
+    external: true
