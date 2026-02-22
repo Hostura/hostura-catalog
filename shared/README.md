@@ -18,10 +18,19 @@ When a catalog application requires a database, the administrator can choose:
 
 ## Available services
 
-| Service | Internal port | Network |
-| ---------- | ------ | --------- |
-| MySQL 8 | 3306 | hostura-internal |
-| PostgreSQL 16 | 5432 | hostura-internal |
+### Core Services
+
+| Service | Ports | Network | Description |
+|---------|-------|---------|-------------|
+| Traefik 3.0 | 80, 443, 8080 | hostura | Reverse proxy with automatic HTTPS |
+| Authentik | 9000 | hostura | Identity provider (SSO, MFA) |
+
+### Database Services
+
+| Service | Internal port | Network | Description |
+|---------|---------------|---------|-------------|
+| MySQL 8 | 3306 | hostura-internal | Shared MySQL instance |
+| PostgreSQL 16 | 5432 | hostura-internal | Shared PostgreSQL instance |
 
 ## Installation
 

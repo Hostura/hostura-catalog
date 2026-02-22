@@ -1,0 +1,33 @@
+name: "Authentik"
+description: "Open-source identity provider with SSO, MFA, and user management"
+version: "2024.2"
+maintainer: "hostura"
+categories:
+  - security
+website: "https://goauthentik.io"
+documentation: "https://docs.goauthentik.io"
+
+type: shared-service
+
+traefik:
+  enabled: true
+  subdomain: "auth"
+  port: 9000
+
+variables:
+  - name: AUTHENTIK_SECRET_KEY
+    label: "Secret key"
+    required: true
+    type: secret
+    generate: true
+  - name: AUTHENTIK_BOOTSTRAP_PASSWORD
+    label: "Admin password"
+    required: true
+    type: secret
+  - name: AUTHENTIK_BOOTSTRAP_EMAIL
+    label: "Admin email"
+    required: true
+
+database:
+  type: postgres
+  default_mode: shared

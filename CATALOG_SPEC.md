@@ -56,6 +56,7 @@ communication
 development
 media
 monitoring
+networking
 productivity
 security
 storage

@@ -1,0 +1,24 @@
+name: "Traefik"
+description: "Cloud-native reverse proxy and load balancer with automatic HTTPS"
+version: "3.0"
+maintainer: "hostura"
+categories:
+  - networking
+website: "https://traefik.io"
+documentation: "https://doc.traefik.io/traefik/"
+
+type: shared-service
+
+traefik:
+  enabled: false  # Traefik itself is not behind a proxy
+
+variables:
+  - name: HOSTURA_DOMAIN
+    label: "Primary domain"
+    required: true
+  - name: HOSTURA_ACME_EMAIL
+    label: "Let's Encrypt email"
+    required: true
+  - name: TRAEFIK_DASHBOARD_AUTH
+    label: "Dashboard basic auth (htpasswd format)"
+    required: false

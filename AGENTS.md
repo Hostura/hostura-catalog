@@ -82,6 +82,7 @@ yamllint apps/{app}/config.yml
 - `development` - Dev tools, CI/CD
 - `media` - Photos, music
 - `monitoring` - Monitoring, alerts
+- `networking` - Reverse proxy, load balancers
 - `productivity` - Notes, wikis, projects
 - `security` - Passwords, VPN, auth
 - `storage` - Files, backups
